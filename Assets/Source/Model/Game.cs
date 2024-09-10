@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class Game
 {
     private Card _baseCard;
-    private Card _topCard;
     private List<Card> _cards;
-    private CardAtTable _topCardAtTable;
+    private List<CardController> _cardsControllers;
+    private List<CardView> _cardViews;
 
-    public Game(CardAtTable[] cardAtTables)
+    public Game(CardController[] cardAtTables)
     {
         if(cardAtTables == null)
             throw new ArgumentNullException(nameof(cardAtTables));
@@ -20,22 +21,52 @@ public class Game
         if(cardAtTables.Length == 0 || cardAtTables.Length != _cards.Count)
             throw new ArgumentOutOfRangeException(nameof(cardAtTables));
 
-        for (int i = 0; i < cardAtTables.Length; i++)
+        _cardsControllers = cardAtTables.ToList();
+        _cardViews = _cardsControllers.ToList().Select(o => o.GetComponent<CardView>()).ToList();
+
+        int lastCardIndex = _cardsControllers.Count - 1;
+        int previousCardIndex = lastCardIndex - 1;
+        Vector3 basePosition = _cardsControllers[lastCardIndex].transform.position;
+
+        for (int i = 0; i < lastCardIndex; i++)
         {
-            cardAtTables[i].Init(_cards[i]);
-            cardAtTables[i].GetComponent<CardView>().Init(_cards[i]);
-            cardAtTables[i].OnCardClick += OnCardClicked;
+            _cardViews[i].Init(_cards[i], basePosition);
+            _cardsControllers[i].OnCardClick += OnCardClicked;
         }
-        /*
-        _baseCard = _cards.Last();
-        _cards.Remove(_baseCard);
-        _topCard = _cards.Last();
-        _cards.Remove(_topCard);*/
+
+        _cardViews[previousCardIndex].BecameVisible();
+        _cardsControllers[previousCardIndex].BecameActive();
+;
+        _cardViews[lastCardIndex].Init(_cards[lastCardIndex], basePosition);
+        _cardViews[lastCardIndex].BecameVisible();
+        
+        _baseCard = _cards[lastCardIndex];
     }
 
-    private void OnCardClicked(Card card)
+    public event Action PlayerWon;
+
+    private void OnCardClicked(CardController controller)
     {
-        throw new NotImplementedException();
+        int index = _cardsControllers.IndexOf(controller);
+
+        if (_cards[index].CanMove(_baseCard))
+        {
+            controller.BecameInactive();
+            _cardViews[index].GoToBase();
+            _cardViews[_cards.IndexOf(_baseCard)].gameObject.SetActive(false);
+            _baseCard = _cards[index];
+
+            if(index > 0)
+            {
+                index--;
+                _cardViews[index].BecameVisible();
+                _cardsControllers[index].BecameActive();
+            }
+            else
+            {
+                PlayerWon?.Invoke();
+            }
+        }
     }
 }
 

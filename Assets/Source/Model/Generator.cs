@@ -65,7 +65,7 @@ public class Generator
         {
             card = CreatePreviousCard(card, isUp);
             _cards.Add(card);
-            seed = UnityEngine.Random.Range(0, _rotateChance);
+            seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
             isUp = seed < _rotateChance ? !isUp : isUp;
         }
     }
