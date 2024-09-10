@@ -1,90 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
-public class Generator
+namespace Assets.Source.Model
 {
-    private const int CardsAmount = 11;
-
-    private readonly int _minCombination = 2;
-    private readonly int _maxCombination = 7;
-    private readonly int _upperChance = 65;
-    private readonly int _lowerChance = 35;
-    private readonly int _rotateChance = 15;
-
-    public List<Card> CreateColumn()
+    public class Generator
     {
-        List<Card> cards = new List<Card>();
+        private const int CardsAmount = 40;
 
-        int combination;
-        int remainingSlots;
-        int maximumCombinationSize;
-        Card card;
+        private readonly int _minCombination = 2;
+        private readonly int _maxCombination = 7;
+        private readonly int _upperChance = 65;
+        private readonly int _lowerChance = 35;
+        private readonly int _rotateChance = 15;
 
-        while (cards.Count < CardsAmount)
+        public int DeckSize => CardsAmount;
+
+        public List<Combination> CreateCombinations()
         {
-            maximumCombinationSize = Math.Min(CardsAmount - cards.Count, _maxCombination) + 1;
-            combination = UnityEngine.Random.Range(_minCombination, maximumCombinationSize);
-            remainingSlots = CardsAmount - cards.Count - combination;
+            List<Combination> combinations = new();
 
-            while (remainingSlots < _minCombination && remainingSlots > 0)
+            int combinationLength;
+            int maximumCombinationSize;
+            int remainingCards = CardsAmount;
+            Card card;
+
+            while (remainingCards > 0)
             {
-                combination = UnityEngine.Random.Range(_minCombination, maximumCombinationSize);
-                remainingSlots = CardsAmount - cards.Count - combination;
+                maximumCombinationSize = Math.Min(remainingCards, _maxCombination) + 1;
+                combinationLength = UnityEngine.Random.Range(_minCombination, maximumCombinationSize);
+
+                card = CreateRandomCard();
+                Combination combination = CreateCombination(combinationLength, card);
+                combinations.Add(combination);
+
+                remainingCards -= combination.Cards.Count();
             }
 
-            card = CreateRandomCard();
-            cards.Add(card);
-            CreateCombination(combination, card, cards);
+            return combinations;
         }
 
-        return cards;
-    }
-
-    public int ColumnSize => CardsAmount;
-
-    private Card CreateRandomCard()
-    {
-        Values value = (Values)UnityEngine.Random.Range(1, Enum.GetValues(typeof(Values)).Length);
-        Suits suit = (Suits)UnityEngine.Random.Range(1, Enum.GetValues(typeof(Suits)).Length);
-        Card card = new Card(suit, value);
-        return card;
-    }
-
-    private Card CreateRandomCard(Values value)
-    {
-        Suits suit = (Suits)UnityEngine.Random.Range(0, Enum.GetValues(typeof(Suits)).Length);
-        Card card = new Card(suit, value);
-        return card;
-    }
-
-    private void CreateCombination(int size, Card firstCard, List<Card> cards)
-    {
-        int seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
-        bool isUp = seed >= _lowerChance;
-        Card card = firstCard;
-
-        for (int i = size - 1; i > 0; i--)
+        private Card CreateRandomCard()
         {
-            card = CreatePreviousCard(card, isUp);
-            cards.Add(card);
-            seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
-            isUp = seed < _rotateChance ? !isUp : isUp;
+            Values value = (Values)UnityEngine.Random.Range(1, Enum.GetValues(typeof(Values)).Length);
+            Suits suit = (Suits)UnityEngine.Random.Range(1, Enum.GetValues(typeof(Suits)).Length);
+            Card card = new Card(suit, value);
+            return card;
         }
-    }
 
-    private Card CreatePreviousCard(Card card, bool isUp)
-    {
-        if (isUp)
+        private Card CreateRandomCard(Values value)
         {
-            if (card.Value == Values.King)
-                return CreateRandomCard(Values.Ace);
-            else
-                return CreateRandomCard((Values)((int)card.Value + 1));
+            Suits suit = (Suits)UnityEngine.Random.Range(0, Enum.GetValues(typeof(Suits)).Length);
+            Card card = new Card(suit, value);
+            return card;
         }
 
-        if (card.Value == Values.Ace)
-            return CreateRandomCard(Values.King);
+        private Combination CreateCombination(int size, Card firstCard)
+        {
+            List<Card> cards = new List<Card>();
 
-        return CreateRandomCard((Values)((int)card.Value - 1));
+            int seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
+            bool isUp = seed >= _lowerChance;
+            Card card = firstCard;
+
+            for (int i = size - 1; i > 0; i--)
+            {
+                card = CreatePreviousCard(card, isUp);
+                cards.Add(card);
+                seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
+                isUp = seed < _rotateChance ? !isUp : isUp;
+            }
+
+            return new(firstCard, cards);
+        }
+
+        private Card CreatePreviousCard(Card card, bool isUp)
+        {
+            if (isUp)
+            {
+                if (card.Value == Values.King)
+                    return CreateRandomCard(Values.Ace);
+                else
+                    return CreateRandomCard((Values)((int)card.Value + 1));
+            }
+
+            if (card.Value == Values.Ace)
+                return CreateRandomCard(Values.King);
+
+            return CreateRandomCard((Values)((int)card.Value - 1));
+        }
     }
 }

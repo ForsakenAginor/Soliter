@@ -1,4 +1,7 @@
-public enum Scenes 
+namespace Assets.Source.General
 {
-    GameScene,
+    public enum Scenes
+    {
+        GameScene,
+    }
 }

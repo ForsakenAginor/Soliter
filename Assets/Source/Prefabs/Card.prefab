@@ -436,6 +436,8 @@ MonoBehaviour:
   _valueTextField: {fileID: 9105569576056567682}
   _face: {fileID: 1509918505738584588}
   _back: {fileID: 3676278484273188453}
+  _animationDuration: 1
+  _background: {fileID: 4221400711192733287}
 --- !u!114 &2782002884939610120
 MonoBehaviour:
   m_ObjectHideFlags: 0

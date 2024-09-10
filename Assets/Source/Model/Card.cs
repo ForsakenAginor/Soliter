@@ -1,31 +1,34 @@
 ﻿using System;
 
-public class Card
+namespace Assets.Source.Model
 {
-    private readonly Suits _suit;
-    private readonly Values _value;
-
-    public Card(Suits suit, Values value)
+    public class Card
     {
-        _suit = suit;
-        _value = value;
-    }
+        private readonly Suits _suit;
+        private readonly Values _value;
 
-    public Values Value => _value;
+        public Card(Suits suit, Values value)
+        {
+            _suit = suit;
+            _value = value;
+        }
 
-    public Suits Suit => _suit;
+        public Values Value => _value;
 
-    public bool CanMove(Card target)
-    {
-        if (MathF.Abs((int)Value - (int)target.Value) == 1)
-            return true;
+        public Suits Suit => _suit;
 
-        if (Value == Values.Ace && target.Value == Values.King)
-            return true;
+        public bool CanMove(Card target)
+        {
+            if (MathF.Abs((int)Value - (int)target.Value) == 1)
+                return true;
 
-        if (target.Value == Values.Ace && Value == Values.King)
-            return true;
+            if (Value == Values.Ace && target.Value == Values.King)
+                return true;
 
-        return false;
+            if (target.Value == Values.Ace && Value == Values.King)
+                return true;
+
+            return false;
+        }
     }
 }

@@ -1,7 +1,10 @@
-﻿public enum Suits
+﻿namespace Assets.Source.Model
 {
-    Hearts,
-    Spades,
-    Clubs,
-    Diamonds
+    public enum Suits
+    {
+        Hearts,
+        Spades,
+        Clubs,
+        Diamonds
+    }
 }

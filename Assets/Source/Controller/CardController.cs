@@ -1,21 +1,25 @@
-﻿using System;
+﻿using Assets.Source.View;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(CardView))]
-public class CardController : MonoBehaviour, IPointerClickHandler
+namespace Assets.Source.Controller
 {
-    private bool _isActive;
-
-    public event Action<CardController> OnCardClick;
-
-    public void OnPointerClick(PointerEventData eventData)
+    [RequireComponent(typeof(CardView))]
+    public class CardController : MonoBehaviour, IPointerClickHandler
     {
-        if (_isActive)
-            OnCardClick?.Invoke(this);
+        private bool _isActive;
+
+        public event Action<CardController> OnCardClick;
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (_isActive)
+                OnCardClick?.Invoke(this);
+        }
+
+        public void BecameActive() => _isActive = true;
+
+        public void BecameInactive() => _isActive = false;
     }
-
-    public void BecameActive() => _isActive = true;
-
-    public void BecameInactive() => _isActive = false;
 }
