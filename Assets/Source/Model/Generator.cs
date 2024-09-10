@@ -40,6 +40,8 @@ public class Generator
         return cards;
     }
 
+    public int ColumnSize => CardsAmount;
+
     private Card CreateRandomCard()
     {
         Values value = (Values)UnityEngine.Random.Range(1, Enum.GetValues(typeof(Values)).Length);

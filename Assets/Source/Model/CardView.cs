@@ -13,6 +13,8 @@ public class CardView : MonoBehaviour
 
     private Vector3 _basePosition;
 
+    public bool IsVisible => _face.activeSelf;
+
     public void Init(Card card, Vector3 basePosition)
     {
         if (card == null)

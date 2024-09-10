@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Root : MonoBehaviour
@@ -12,7 +13,14 @@ public class Root : MonoBehaviour
 
     private void Awake()
     {
-        _game = new Game(_firstColumn);
+        List<CardController[]> cards = new()
+        {
+            _firstColumn,
+            _secondColumn,
+            _thirdColumn,
+            _fourthColumn
+        };
+        _game = new Game(cards);
         _game.PlayerWon += OnPlayerWon;
     }
 
