@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class Game
 {
+    private readonly List<Card> _cards = new();
+    private readonly List<Card> _solvedCards = new();
+    private readonly List<CardController> _cardsControllers = new();
+    private readonly List<CardView> _cardViews = new();
+    private readonly Generator _generator;
+
     private Card _baseCard;
-    private List<Card> _cards = new();
-    private List<Card> _solvedCards = new();
-    private List<CardController> _cardsControllers = new();
-    private List<CardView> _cardViews = new();
-    private Generator _generator;
 
     public Game(List<CardController[]> cardsAtTable)
     {
@@ -24,6 +25,24 @@ public class Game
                 throw new ArgumentOutOfRangeException(nameof(cardsAtTable));
 
         InitializeCards(cardsAtTable);
+    }
+
+    ~Game()
+    {
+        int lastCardIndex = _cardsControllers.Count - 1;
+
+        for (int i = 0; i < lastCardIndex; i++)
+        {
+            try
+            {
+                _cardsControllers[i].OnCardClick -= OnCardClicked;
+                _cardsControllers[i].OnCardClick -= OnBankCardClicked;
+            }
+            catch
+            {
+                continue;
+            }
+        }
     }
 
     public event Action PlayerWon;
@@ -110,4 +129,3 @@ public class Game
         }
     }
 }
-
