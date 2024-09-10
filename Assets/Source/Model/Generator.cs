@@ -10,35 +10,35 @@ public class Generator
     private readonly int _upperChance = 65;
     private readonly int _lowerChance = 35;
     private readonly int _rotateChance = 15;
-    private readonly List<Card> _cards = new List<Card>();
 
-    public Generator()
+    public List<Card> CreateColumn()
     {
+        List<Card> cards = new List<Card>();
+
         int combination;
         int remainingSlots;
         int maximumCombinationSize;
         Card card;
 
-        while (_cards.Count < CardsAmount)
+        while (cards.Count < CardsAmount)
         {
-            maximumCombinationSize = Math.Min(CardsAmount - _cards.Count, _maxCombination) +1;
+            maximumCombinationSize = Math.Min(CardsAmount - cards.Count, _maxCombination) + 1;
             combination = UnityEngine.Random.Range(_minCombination, maximumCombinationSize);
-            remainingSlots = CardsAmount - _cards.Count - combination;
+            remainingSlots = CardsAmount - cards.Count - combination;
 
             while (remainingSlots < _minCombination && remainingSlots > 0)
             {
                 combination = UnityEngine.Random.Range(_minCombination, maximumCombinationSize);
-                remainingSlots = CardsAmount - _cards.Count - combination;
+                remainingSlots = CardsAmount - cards.Count - combination;
             }
 
             card = CreateRandomCard();
-            _cards.Add(card);
-            CreateCombination(combination, card);
+            cards.Add(card);
+            CreateCombination(combination, card, cards);
         }
+
+        return cards;
     }
-
-    public IEnumerable<Card> Cards => _cards;
-
 
     private Card CreateRandomCard()
     {
@@ -55,7 +55,7 @@ public class Generator
         return card;
     }
 
-    private void CreateCombination(int size, Card firstCard)
+    private void CreateCombination(int size, Card firstCard, List<Card> cards)
     {
         int seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
         bool isUp = seed >= _lowerChance;
@@ -64,7 +64,7 @@ public class Generator
         for (int i = size - 1; i > 0; i--)
         {
             card = CreatePreviousCard(card, isUp);
-            _cards.Add(card);
+            cards.Add(card);
             seed = UnityEngine.Random.Range(0, _upperChance + _lowerChance);
             isUp = seed < _rotateChance ? !isUp : isUp;
         }

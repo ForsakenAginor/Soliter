@@ -16,7 +16,7 @@ public class Game
             throw new ArgumentNullException(nameof(cardAtTables));
 
         Generator generator = new Generator();
-        _cards = generator.Cards.ToList();
+        _cards = generator.CreateColumn();
 
         if(cardAtTables.Length == 0 || cardAtTables.Length != _cards.Count)
             throw new ArgumentOutOfRangeException(nameof(cardAtTables));
