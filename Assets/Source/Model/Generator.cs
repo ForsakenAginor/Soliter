@@ -30,6 +30,7 @@ namespace Assets.Source.Model
                 maximumCombinationSize = Math.Min(remainingCards, _maxCombination) + 1;
                 combinationLength = UnityEngine.Random.Range(_minCombination, maximumCombinationSize);
 
+                //Create card, that will start combination
                 card = CreateRandomCard();
                 Combination combination = CreateCombination(combinationLength, card);
                 combinations.Add(combination);
@@ -74,6 +75,12 @@ namespace Assets.Source.Model
             return new(firstCard, cards);
         }
 
+        /// <summary>
+        /// Create previous card in combination, depending at direction "isUp"
+        /// </summary>
+        /// <param name="card">Current card in combination</param>
+        /// <param name="isUp">Direction of combination</param>
+        /// <returns></returns>
         private Card CreatePreviousCard(Card card, bool isUp)
         {
             if (isUp)
