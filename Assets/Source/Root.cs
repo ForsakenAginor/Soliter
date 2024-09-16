@@ -2,6 +2,7 @@ using Assets.Source.Controller;
 using Assets.Source.General;
 using Assets.Source.Model;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -19,37 +20,94 @@ namespace Assets.Source
 
         [Header("UI")]
         [SerializeField] private GameObject _victoryScreen;
-        [SerializeField] private Button _newGameButton;
-        [SerializeField] private Button _exitGameButton;
+        [SerializeField] private GameObject _losingScreen;
+        [SerializeField] private GameObject _buttonPanel;
+        [SerializeField] private Button[] _newGameButtons;
+        [SerializeField] private Button[] _exitGameButtons;
+        [SerializeField] private Button[] _restartGameButtons;
 
         private Game _game;
 
-        private void Awake()
+        private void Start()
         {
-            List<List<CardController>> deck = new()
-        {
-            _firstColumn,
-            _secondColumn,
-            _thirdColumn,
-            _fourthColumn
-        };
+            Generator generator = new Generator();
 
-            _game = new Game(deck, _bank, _base.position);
+            //Prepare gameobjects to use in model
+            List<List<IController>> deck = new()
+            {
+                _firstColumn.Select(o => o as IController).ToList(),
+                _secondColumn.Select(o => o as IController).ToList(),
+                _thirdColumn.Select(o => o as IController).ToList(),
+                _fourthColumn.Select(o => o as IController).ToList(),
+            };
+
+            List<IController> bank = _bank.Select(o => o as IController).ToList();
+
+            _game = new Game(deck, bank, generator.CreateCombinations(), _base.position);
             _game.PlayerWon += OnPlayerWon;
-            _newGameButton.onClick.AddListener(OnNewGameButtonClick);
-            _exitGameButton.onClick.AddListener(OnExitButtonClick);
+            _game.PlayerLosed += OnPlayerLosed;
+
+            foreach (var button in _newGameButtons)
+                button.onClick.AddListener(OnNewGameButtonClick);
+
+            foreach (var button in _exitGameButtons)
+                button.onClick.AddListener(OnExitButtonClick);
+
+            foreach (var button in _restartGameButtons)
+                button.onClick.AddListener(OnRestartButtonClick);
         }
 
         private void OnDestroy()
         {
             _game.PlayerWon -= OnPlayerWon;
-            _newGameButton.onClick.RemoveListener(OnNewGameButtonClick);
-            _exitGameButton.onClick.RemoveListener(OnExitButtonClick);
+            _game.PlayerLosed -= OnPlayerLosed;
+
+            foreach (var button in _newGameButtons)
+                button.onClick.RemoveListener(OnNewGameButtonClick);
+
+            foreach (var button in _exitGameButtons)
+                button.onClick.RemoveListener(OnExitButtonClick);
+
+            foreach (var button in _restartGameButtons)
+                button.onClick.RemoveListener(OnRestartButtonClick);
+        }
+
+        private void OnRestartButtonClick()
+        {
+            foreach (var controller in _firstColumn)
+                controller.Normalize();
+
+            foreach (var controller in _secondColumn)
+                controller.Normalize();
+
+            foreach (var controller in _thirdColumn)
+                controller.Normalize();
+
+            foreach (var controller in _fourthColumn)
+                controller.Normalize();
+
+            foreach (var controller in _bank)
+                controller.Normalize();
+
+            //Prepare gameobjects to use in model
+            List<List<IController>> deck = new()
+            {
+                _firstColumn.Select(o => o as IController).ToList(),
+                _secondColumn.Select(o => o as IController).ToList(),
+                _thirdColumn.Select(o => o as IController).ToList(),
+                _fourthColumn.Select(o => o as IController).ToList(),
+            };
+
+            List<IController> bank = _bank.Select(o => o as IController).ToList();
+
+            _game.Load(deck, bank);
+            _buttonPanel.SetActive(true);
+            _losingScreen.SetActive(false);
         }
 
         private void OnExitButtonClick()
         {
-            Application.Quit();
+            SceneManager.LoadScene(Scenes.MainMenu.ToString());
         }
 
         private void OnNewGameButtonClick()
@@ -60,6 +118,13 @@ namespace Assets.Source
         private void OnPlayerWon()
         {
             _victoryScreen.SetActive(true);
+            _buttonPanel.SetActive(false);
+        }
+
+        private void OnPlayerLosed()
+        {
+            _losingScreen.SetActive(true);
+            _buttonPanel.SetActive(false);
         }
     }
 }
